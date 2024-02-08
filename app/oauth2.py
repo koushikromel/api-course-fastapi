@@ -4,10 +4,12 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from . import schemas, database, models
+from .config import settings
 
-SECRET_KEY = "f91ddda468f26afafee7af8851d735ad137ec41447a0b56824ede759e570a24f"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRES_MINUTES = 60
+
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRES_MINUTES = settings.access_token_expire_minutes
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 

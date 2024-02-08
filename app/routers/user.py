@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from .. import models, schemas, utils
+from .. import models, schemas, utils, oauth2
 from sqlalchemy.orm import Session
 from ..database import get_db
+from typing import List
 
 router = APIRouter(
     prefix="/users",
@@ -24,3 +25,10 @@ def get_user(id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail=f"User with id {id} not found")
     return user
+
+@router.get("/", response_model=List[schemas.UserOut])
+def get_user(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return users
+
+#  add a new endpoint with current_user details
