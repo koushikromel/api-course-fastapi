@@ -1,6 +1,7 @@
 from sqlalchemy.engine import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
 from .config import settings
 
 # SQL_DATABSE_URL = "postgresql://<name>:<password>@<ip_addr/hostname>:<port>/database_name"
