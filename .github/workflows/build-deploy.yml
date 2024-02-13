@@ -11,7 +11,7 @@ jobs:
       - name: say hi to koushik
         run: echo "Hello, Koushik!"
       - name: Install Python
-        uses: actions/python@v2
+        uses: actions/setup-python@v2
         with:
           python-version: "3.9"
       - name: Update Pip
