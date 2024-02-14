@@ -17,7 +17,6 @@ def bank_account():
 ])
 
 def test_add(num1, num2, result):
-    print("testing add")
     assert add(num1, num2) == result
 
 def test_subtract():
