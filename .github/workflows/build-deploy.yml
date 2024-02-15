@@ -84,8 +84,8 @@ jobs:
       - name: SSH into ec2 instance
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "
-            cd /home/koushik/app/src/ &&
-            git pull &&
-            sudo systectl restart api
-            "
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+          cd /home/koushik/app/src/ &&
+          git pull origin master &&
+          sudo systectl restart api
+          '
