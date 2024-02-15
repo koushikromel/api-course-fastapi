@@ -73,14 +73,14 @@ jobs:
     needs: [build]
     environment:
       name: production
+    env:
+      PRIVATE_KEY: ${{secrets.SSH_KEY}}
+      HOST_NAME: ${{secrets.HOST_NAME}}
+      USER_NAME: ${{secrets.USER_NAME}}
     steps:
       - uses: actions/checkout@v2 
       - name: Deploying stuff
         run: echo "Going to deploy some stuff"
-      env:
-        PRIVATE_KEY: ${{secrets.SSH_KEY}}
-        HOST_NAME: ${{secrets.HOST_NAME}}
-        USER_NAME: ${{secrets.USER_NAME}}
       - name: SSH into ec2 instance
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
