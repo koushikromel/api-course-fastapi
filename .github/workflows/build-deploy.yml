@@ -3,49 +3,50 @@ name: Build and Deploy applicaion
 on: [push, pull_request]
 
 jobs:
-  build:
-    environment:
-      name: testing
-    env:
-      DB_HOSTNAME: ${{secrets.DB_HOSTNAME}}
-      DB_PORT: ${{secrets.DB_PORT}}
-      DB_USERNAME: ${{secrets.DB_USERNAME}}
-      DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-      DB_NAME: ${{secrets.DB_NAME}}
-      SECRET_KEY: ${{secrets.SECRET_KEY}}
-      ALGORITHM: ${{secrets.ALGORITHM}}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
-          POSTGRES_DB: ${{secrets.DB_NAME}}_test
-        ports:
-          - 5432:5432
-        options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-    runs-on: ubuntu-latest
-    steps:
-      - name: pulling git repo
-        uses: actions/checkout@v2
-      - name: say hi to koushik
-        run: echo "Hello, Koushik!"
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - name: Update Pip
-        run: python -m pip install --upgrade pip
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest
+  # build:
+  #   environment:
+  #     name: testing
+  #   env:
+  #     DB_HOSTNAME: ${{secrets.DB_HOSTNAME}}
+  #     DB_PORT: ${{secrets.DB_PORT}}
+  #     DB_USERNAME: ${{secrets.DB_USERNAME}}
+  #     DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+  #     DB_NAME: ${{secrets.DB_NAME}}
+  #     SECRET_KEY: ${{secrets.SECRET_KEY}}
+  #     ALGORITHM: ${{secrets.ALGORITHM}}
+  #     ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
+  #   services:
+  #     postgres:
+  #       image: postgres
+  #       env:
+  #         POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+  #         POSTGRES_DB: ${{secrets.DB_NAME}}_test
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #           --health-cmd pg_isready
+  #           --health-interval 10s
+  #           --health-timeout 5s
+  #           --health-retries 5
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: pulling git repo
+  #       uses: actions/checkout@v2
+  #     - name: say hi to koushik
+  #       run: echo "Hello, Koushik!"
+  #     - name: Install Python
+  #       uses: actions/setup-python@v2
+  #       with:
+  #         python-version: "3.9"
+  #     - name: Update Pip
+  #       run: python -m pip install --upgrade pip
+  #     - name: Install dependencies
+  #       run: pip install -r requirements.txt
+  #     - name: Test with pytest
+  #       run: |
+  #         pip install pytest
+  #         pytest
+
       # - name: Login to Docker Hub
       #   uses: docker/login-action@v1
       #   with:
@@ -68,39 +69,29 @@ jobs:
       # - name: Image Digest
       #   run: echo ${{steps.docker_build.outputs.digest}}
 # a
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: [build]
-  #   environment:
-  #     name: production
-  #   env:
-  #     PRIVATE_KEY: ${{secrets.SSH_KEY}}
-  #     HOST_NAME: ${{secrets.HOST_NAME}}
-  #     USER_NAME: ${{secrets.USER_NAME}}
-  #   steps:
-  #     # - uses: actions/checkout@v2 
-  #     - name: Deploying stuff
-  #       run: echo "Going to deploy some stuff"
-  #     - name: SSH into ec2 instance
-  #       run: |
-  #         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-  #         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
-  #         cd /home/koushik/app/src/ &&
-  #         git pull origin master &&
-  #         sudo systectl restart api
-  #        '
   deploy:
     runs-on: ubuntu-latest
+    needs: [build]
+    environment:
+      name: production
     env:
-      EC2_SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
-      EC2_URL: ${{ secrets.EC2_URL }}
-      EC2_USERNAME: ${{ secrets.USER_NAME }}
+      PRIVATE_KEY: ${{secrets.SSH_KEY}}
+      HOST_NAME: ${{secrets.HOST_NAME}}
+      USER_NAME: ${{secrets.USER_NAME}}
     steps:
-    - name: Setup SSH for EC2
-      uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
-      with:
-          EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
-          EC2_URL: $EC2_URL
-    # then you can run commands/scripts directly on the EC2 instance e.g.:
-    - name: Create a new file on the EC2 instance with "hello-world"
-      run: ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL "echo "hello-world" >> new_file.txt"
+      - uses: actions/checkout@v3
+      - name: Deploying stuff
+        run: echo "Going to deploy some stuff"
+      - name: SSH into ec2 instance
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key $USER_NAME@$HOST_NAME << EOF
+          mkdir testingProject1
+          EOF
+        #   echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        #   ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
+        #   cd /home/koushik/app/src/ &&
+        #   git pull origin master &&
+        #   sudo systectl restart api
+        #  '
+  
