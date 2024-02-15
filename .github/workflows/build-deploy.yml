@@ -71,7 +71,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build]
-
+    environment:
+      name: production
+    env:
+      PRIVATE_KEY: ${{secrets.SSH_KEY}}
+      HOST_NAME: ${{secrets.HOST_NAME}}
+      USER_NAME: ${{secrets.USER_NAME}}
     steps:
       - name: Deploying stuff
         run: echo "Going to deploy some stuff"
+      - name: SSH into ec2 instance
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "
+            cd /home/koushik/app/src/ &&
+            git pull &&
+            sudo systectl restart api
+            "
