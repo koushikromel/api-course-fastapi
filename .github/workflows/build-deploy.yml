@@ -68,24 +68,39 @@ jobs:
       # - name: Image Digest
       #   run: echo ${{steps.docker_build.outputs.digest}}
 # a
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: [build]
+  #   environment:
+  #     name: production
+  #   env:
+  #     PRIVATE_KEY: ${{secrets.SSH_KEY}}
+  #     HOST_NAME: ${{secrets.HOST_NAME}}
+  #     USER_NAME: ${{secrets.USER_NAME}}
+  #   steps:
+  #     # - uses: actions/checkout@v2 
+  #     - name: Deploying stuff
+  #       run: echo "Going to deploy some stuff"
+  #     - name: SSH into ec2 instance
+  #       run: |
+  #         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+  #         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
+  #         cd /home/koushik/app/src/ &&
+  #         git pull origin master &&
+  #         sudo systectl restart api
+  #        '
   deploy:
     runs-on: ubuntu-latest
-    needs: [build]
-    environment:
-      name: production
     env:
-      PRIVATE_KEY: ${{secrets.SSH_KEY}}
-      HOST_NAME: ${{secrets.HOST_NAME}}
-      USER_NAME: ${{secrets.USER_NAME}}
+      EC2_SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+      EC2_URL: ${{ secrets.EC2_URL }}
+      EC2_USERNAME: ${{ secrets.USER_NAME }}
     steps:
-      # - uses: actions/checkout@v2 
-      - name: Deploying stuff
-        run: echo "Going to deploy some stuff"
-      - name: SSH into ec2 instance
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
-          cd /home/koushik/app/src/ &&
-          git pull origin master &&
-          sudo systectl restart api
-          '
+    - name: Setup SSH for EC2
+      uses: omarhosny206/setup-ssh-for-ec2@v1.0.0
+      with:
+          EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
+          EC2_URL: $EC2_URL
+    # then you can run commands/scripts directly on the EC2 instance e.g.:
+    - name: Create a new file on the EC2 instance with "hello-world"
+      run: ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL "echo "hello-world" >> new_file.txt"
