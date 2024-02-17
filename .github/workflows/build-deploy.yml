@@ -1,99 +1,99 @@
-name: Build and Deploy applicaion
+# name: Build and Deploy applicaion
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
-jobs:
-  build:
-    environment:
-      name: testing
-    env:
-      DB_HOSTNAME: ${{secrets.DB_HOSTNAME}}
-      DB_PORT: ${{secrets.DB_PORT}}
-      DB_USERNAME: ${{secrets.DB_USERNAME}}
-      DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-      DB_NAME: ${{secrets.DB_NAME}}
-      SECRET_KEY: ${{secrets.SECRET_KEY}}
-      ALGORITHM: ${{secrets.ALGORITHM}}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
-          POSTGRES_DB: ${{secrets.DB_NAME}}_test
-        ports:
-          - 5432:5432
-        options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
-    runs-on: ubuntu-latest
-    steps:
-      - name: pulling git repo
-        uses: actions/checkout@v2
-      - name: say hi to koushik
-        run: echo "Hello, Koushik!"
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - name: Update Pip
-        run: python -m pip install --upgrade pip
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest
+# jobs:
+#   build:
+#     environment:
+#       name: testing
+#     env:
+#       DB_HOSTNAME: ${{secrets.DB_HOSTNAME}}
+#       DB_PORT: ${{secrets.DB_PORT}}
+#       DB_USERNAME: ${{secrets.DB_USERNAME}}
+#       DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+#       DB_NAME: ${{secrets.DB_NAME}}
+#       SECRET_KEY: ${{secrets.SECRET_KEY}}
+#       ALGORITHM: ${{secrets.ALGORITHM}}
+#       ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
+#     services:
+#       postgres:
+#         image: postgres
+#         env:
+#           POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+#           POSTGRES_DB: ${{secrets.DB_NAME}}_test
+#         ports:
+#           - 5432:5432
+#         options: >-
+#             --health-cmd pg_isready
+#             --health-interval 10s
+#             --health-timeout 5s
+#             --health-retries 5
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: pulling git repo
+#         uses: actions/checkout@v2
+#       - name: say hi to koushik
+#         run: echo "Hello, Koushik!"
+#       - name: Install Python
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: "3.9"
+#       - name: Update Pip
+#         run: python -m pip install --upgrade pip
+#       - name: Install dependencies
+#         run: pip install -r requirements.txt
+#       - name: Test with pytest
+#         run: |
+#           pip install pytest
+#           pytest
 
-      # - name: Login to Docker Hub
-      #   uses: docker/login-action@v1
-      #   with:
-      #     username: ${{secrets.DOCKER_HUB_USERNAME}}
-      #     password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
-      # - name: Setup Docker Buildx
-      #   id: buildx
-      #   uses: docker/setup-buildx-action@v1
-      # - name: Build and push
-      #   id: docker_build
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./
-      #     file: ./Dockerfile
-      #     builder: ${{steps.buildx.outputs.name}}
-      #     push: true
-      #     tags: ${{secrets.DOCKER_HUB_USERNAME}}/fastapi:latest
-      #     cache-from: type=local,src=/tmp/.buildx-cache
-      #     cache-to: type=local,dest=/tmp/.buildx-cache
-      # - name: Image Digest
-      #   run: echo ${{steps.docker_build.outputs.digest}}
-# a
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [build]
-    environment:
-      name: production
-    env:
-      PRIVATE_KEY: ${{secrets.SSH_KEY}}
-      HOST_NAME: ${{secrets.HOST_NAME}}
-      USER_NAME: ${{secrets.USER_NAME}}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploying stuff
-        run: echo "Going to deploy some stuff"
-      - name: SSH into ec2 instance
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key $USER_NAME@$HOST_NAME << EOF
-          cd /home/koushik/app/src/ &&
-          git pull origin master &&
-          sudo systemctl restart api
-          EOF
-        #   echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        #   ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
-        #   cd /home/koushik/app/src/ &&
-        #   git pull origin master &&
-        #   sudo systectl restart api
-        #  '
+#       # - name: Login to Docker Hub
+#       #   uses: docker/login-action@v1
+#       #   with:
+#       #     username: ${{secrets.DOCKER_HUB_USERNAME}}
+#       #     password: ${{secrets.DOCKER_HUB_ACCESS_TOKEN}}
+#       # - name: Setup Docker Buildx
+#       #   id: buildx
+#       #   uses: docker/setup-buildx-action@v1
+#       # - name: Build and push
+#       #   id: docker_build
+#       #   uses: docker/build-push-action@v2
+#       #   with:
+#       #     context: ./
+#       #     file: ./Dockerfile
+#       #     builder: ${{steps.buildx.outputs.name}}
+#       #     push: true
+#       #     tags: ${{secrets.DOCKER_HUB_USERNAME}}/fastapi:latest
+#       #     cache-from: type=local,src=/tmp/.buildx-cache
+#       #     cache-to: type=local,dest=/tmp/.buildx-cache
+#       # - name: Image Digest
+#       #   run: echo ${{steps.docker_build.outputs.digest}}
+# # a
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: [build]
+#     environment:
+#       name: production
+#     env:
+#       PRIVATE_KEY: ${{secrets.SSH_KEY}}
+#       HOST_NAME: ${{secrets.HOST_NAME}}
+#       USER_NAME: ${{secrets.USER_NAME}}
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Deploying stuff
+#         run: echo "Going to deploy some stuff"
+#       - name: SSH into ec2 instance
+#         run: |
+#           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+#           ssh -o StrictHostKeyChecking=no -i private_key $USER_NAME@$HOST_NAME << EOF
+#           cd /home/koushik/app/src/ &&
+#           git pull origin master &&
+#           sudo systemctl restart api
+#           EOF
+#         #   echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+#         #   ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
+#         #   cd /home/koushik/app/src/ &&
+#         #   git pull origin master &&
+#         #   sudo systectl restart api
+#         #  '
   
